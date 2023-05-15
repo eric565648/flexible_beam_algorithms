@@ -115,7 +115,8 @@ class FlexbleBeamFixLin:
         self.iteration = 0
         self.last_phi = 0
 
-        obs_state = np.array([0,dtheta_init])
+        # obs_state = np.array([0,dtheta_init])
+        obs_state = np.array([0,dtheta_init,0,0])
         return obs_state
 
     def sys_ode(self,q_init,t,u):
@@ -195,25 +196,31 @@ def test_env():
     obs_state = env.reset(random=False)
     all_w = [obs_state[0]]
     all_phi = [obs_state[1]]
+    all_wdot = [obs_state[2]]
+    all_phidot = [obs_state[3]]
     all_torques = []
     rewards = []
     while True:
         # test PD
         torque = np.squeeze(-1*np.matmul(env.KPD,env.qstate))
-        torque = 2
-        if len(all_torques)>100:
-            torque = -2
+        # torque = 2
+        # if len(all_torques)>100:
+        #     torque = -2
         obs_state_next,reward,done = env.step([torque])
-        print(obs_state_next)
+        # print(obs_state_next)
         all_torques.append(torque)
         all_w.append(obs_state_next[0])
         all_phi.append(obs_state_next[1])
+        all_wdot.append(obs_state_next[2])
+        all_phidot.append(obs_state_next[3])
         rewards.append(reward)
         if done:
             break
     
     plt.plot(all_phi,label='phi')
     plt.plot(all_w,label='deviation w')
+    plt.plot(all_phidot,label='phi dot')
+    plt.plot(all_wdot,label='deviation w dot')
     plt.plot(rewards,label='instant reward')
     plt.legend()
     plt.title("PD Agent Performance")

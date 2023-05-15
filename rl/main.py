@@ -19,8 +19,8 @@ env = FlexbleBeamFixLin()
 torch.manual_seed(0)
 np.random.seed(0)
 #Environment action ans states
-obs_window = 5
-state_dim = 2*obs_window
+obs_window = 1
+state_dim = 4*obs_window
 action_dim = 1
 max_action = float(2)
 # Exploration Noise

@@ -10,13 +10,13 @@ from utils import *
 # Hyperparameters adapted for performance from
 #https://ai.stackexchange.com/questions/22945/ddpg-doesnt-converge-for-mountaincarcontinuous-v0-gym-environment
 capacity=1000000
-batch_size=128
+batch_size=32
 # update_iteration=200
 update_iteration=1
 tau=0.001 # tau for soft updating
 gamma=0.99 # discount factor
 directory = 'models/'
-hidden1=32 # hidden layer for actor
+hidden1=20 # hidden layer for actor
 hidden2=64 #hidden laye for critic
 
 class DDPG(object):
@@ -39,12 +39,12 @@ class DDPG(object):
         self.actor = Actor(state_dim, action_dim, hidden1).to(self.device)
         self.actor_target = Actor(state_dim, action_dim,  hidden1).to(self.device)
         self.actor_target.load_state_dict(self.actor.state_dict())
-        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=1e-3)
+        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=1e-4)
 
         self.critic = Critic(state_dim, action_dim,  hidden2).to(self.device)
         self.critic_target = Critic(state_dim, action_dim,  hidden2).to(self.device)
         self.critic_target.load_state_dict(self.critic.state_dict())
-        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=10*1e-3)
+        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=10*1e-4)
         # learning rate
 
         self.num_critic_update_iteration = 0
