@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.random.mtrand import random
 from scipy import integrate
 from matplotlib import pyplot as plt
 from copy import deepcopy
@@ -80,16 +81,19 @@ class FlexbleBeamFixLin:
             qout = qout[-1]
             self.qstate = deepcopy(qout)
 
+        qoutdot = qout[self.qD:]
         qout = qout[:self.qD]
         qout[0] = qout[0]+self.phi_des/self.c
         l_sample = np.array([self.beam_L])
         w,phi = self.q2wphi(qout,l_sample)
+        wdot,phidot = self.q2wphi(qoutdot,l_sample)
         tipx,tipy,tipxb,tipyb = self.wphi2xy(w,phi,l_sample)
 
-        reward = -1*np.linalg.norm([tipx-self.x_des,tipy-self.y_des])*self.score_scale
+        reward = -1*(np.linalg.norm([tipx-self.x_des,tipy-self.y_des])*self.score_scale+0.001 * (action[0]**2))
 
         # observe tip deviation and phi
-        obs_state = np.array([w[-1],phi])
+        # obs_state = np.array([w[-1]*10,phi])
+        obs_state = np.array([w[-1],phi,wdot[-1],phidot])
 
         self.iteration += 1
         done = False
@@ -188,7 +192,7 @@ def test_PD():
 def test_env():
     
     env = FlexbleBeamFixLin()
-    obs_state = env.reset()
+    obs_state = env.reset(random=False)
     all_w = [obs_state[0]]
     all_phi = [obs_state[1]]
     all_torques = []
@@ -196,10 +200,11 @@ def test_env():
     while True:
         # test PD
         torque = np.squeeze(-1*np.matmul(env.KPD,env.qstate))
-        # torque = 2
-        # if len(all_torques)>100:
-        #     torque = -2
+        torque = 2
+        if len(all_torques)>100:
+            torque = -2
         obs_state_next,reward,done = env.step([torque])
+        print(obs_state_next)
         all_torques.append(torque)
         all_w.append(obs_state_next[0])
         all_phi.append(obs_state_next[1])

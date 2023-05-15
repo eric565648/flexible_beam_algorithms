@@ -19,11 +19,10 @@ env = FlexbleBeamFixLin()
 torch.manual_seed(0)
 np.random.seed(0)
 #Environment action ans states
-obs_window = 3
+obs_window = 5
 state_dim = 2*obs_window
 action_dim = 1
 max_action = float(2)
-min_Val = torch.tensor(1e-7).float().to(device) 
 # Exploration Noise
 exploration_noise=0.1
 exploration_noise=0.1 * max_action
@@ -41,6 +40,7 @@ import time
 st = time.time()
 ready_to_train = False
 episode_G=[]
+max_episode_G=-999999999
 for ep in range(max_episode):
     rewards = []
     state = env.reset()
@@ -77,8 +77,12 @@ for ep in range(max_episode):
     episode_G.append(np.sum(rewards))
     # agent.update()
     if ep%10==1:
-        agent.save()
+        agent.save('models/')
         status_str="Episode: "+str(ep)+', Rewards: '+str(np.mean(episode_G[-10:]))
         print(status_str)
+    if episode_G[-1]>max_episode_G:
+        print("Save Best! Episode G:",episode_G[-1])
+        agent.save('models/best_')
+        max_episode_G=episode_G[-1]
     np.save('results/episode_G',episode_G)
 print(time.time()-st)

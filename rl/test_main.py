@@ -16,15 +16,15 @@ torch.manual_seed(0)
 np.random.seed(0)
 
 #Environment action ans states
-obs_window = 3
+obs_window = 5
 state_dim = 2*obs_window
 action_dim = 1
 max_action = float(2)
-min_Val = torch.tensor(1e-7).float().to(device) 
 
 # Create a DDPG instance
 agent = DDPG(state_dim, action_dim, device)
 
+# agent.load('models/best_')
 agent.load('models/')
 
 rewards = []

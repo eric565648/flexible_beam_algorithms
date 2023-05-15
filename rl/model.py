@@ -19,7 +19,7 @@ class Actor(nn.Module):
             nn.ReLU(), 
             nn.Linear(hidden1, hidden1), 
             nn.ReLU(), 
-            nn.Linear(hidden1, 1)
+            nn.Linear(hidden1, action_dim)
         )
         
     def forward(self, state):
@@ -44,7 +44,7 @@ class Critic(nn.Module):
             nn.ReLU(), 
             nn.Linear(hidden2, hidden2), 
             nn.ReLU(), 
-            nn.Linear(hidden2, action_dim)
+            nn.Linear(hidden2, 1)
         )
         
     def forward(self, state, action):
