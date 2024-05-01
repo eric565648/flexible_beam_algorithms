@@ -64,6 +64,14 @@ for i=2:length(ks)
     Bnn = [Bnn bnn];
 end
 
+% save data
+writematrix(omegas,'linear_fixed_data/omegas.csv','Delimiter',',');
+writematrix(ks,'linear_fixed_data/ks.csv','Delimiter',',');
+writematrix(Ann,'linear_fixed_data/Ann.csv','Delimiter',',');
+writematrix(Bnn,'linear_fixed_data/Bnn.csv','Delimiter',',');
+writematrix(Cnn,'linear_fixed_data/Cnn.csv','Delimiter',',');
+writematrix(Dnn,'linear_fixed_data/Dnn.csv','Delimiter',',');
+
 % system
 Omega = diag(omegas);
 A = [zeros(qD,qD) eye(qD);-Omega*Omega zeros(qD,qD)];
