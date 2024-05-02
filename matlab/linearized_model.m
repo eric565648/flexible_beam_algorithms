@@ -1,70 +1,8 @@
 clear all; close all;
 
-L = 1.1; % 1.1 m
-EI = 2.1*1.167;
-zho = 0.4436;
-rA = 0.05; % radius of the base
-MA = 50;
-IH = 0.5*50*(rA^2); % inertia of the base
-a=1;
-% c = 1.44;
-c = sqrt(a)*(L^3/3+IH/zho)^(-1/2);
+load("flexible_beam_system.mat");
 
-% desired angle phi
-phi_des = pi/4;
-
-omegas = [];
-ks = [];
-inits = [];
-total_N_limit = 8;
-for init=0:0.5:10
-    syms k real;
-    eqn = IH/zho*k^3*(1+cos(k*L)*cosh(k*L))+(sin(k*L)*cosh(k*L)-cos(k*L)*sinh(k*L)) == 0;
-    k = vpasolve(eqn,init*pi);
-    omega = sqrt(EI/zho*k^4);
-    
-    if k<0
-        continue
-    elseif any(ks==double(round(k,8)))
-        continue
-    end
-    ks = [ks double(round(k,8))];
-    omegas = [omegas double(round(omega,8))];
-    inits = [inits init];
-    if length(omegas)>=total_N_limit
-        break
-    end
-end
-qD = length(ks);
-
-syms l cn real;
-sci_0 = c*l;
-Ann=[0];
-Bnn=[0];
-Cnn=[c];
-Dnn=[0];
-for i=2:length(ks)
-    k=ks(i);
-    dn=-cn;
-    an=(cos(k*L)*cosh(k*L)+sin(k*L)*sinh(k*L)+1)/(-sin(k*L)*cosh(k*L)+cos(k*L)*sinh(k*L))*cn;
-    bn=2*zho/(IH*k^3)*cn-an;
-    sci = cn*cos(k*l) + dn*cosh(k*l) + an*sin(k*l) + bn*sinh(k*l);
-    sci_p_0 = an*k + bn*k;
-    
-    fcn=int((sci)^2,l,0,L)+IH/zho*sci_p_0*sci_p_0 == a;
-    cnn = vpasolve(fcn,cn,1);
-    cnn = double(cnn(2));
-    dnn = -cnn;
-    ann = (cos(k*L)*cosh(k*L)+sin(k*L)*sinh(k*L)+1)/(-sin(k*L)*cosh(k*L)+cos(k*L)*sinh(k*L))*cnn;
-    bnn = 2*zho/(IH*k^3)*cnn-ann;
-    
-    Cnn = [Cnn cnn];
-    Dnn = [Dnn dnn];
-    Ann = [Ann ann];
-    Bnn = [Bnn bnn];
-end
-
-% system
+% linearized system
 CL=[];
 for i=1:qD
     if i==1
@@ -101,13 +39,13 @@ flex_sys = ss(A,B,C,0);
 
 q_des = phi_des/c;
 Kp = .1; Kd = .1;
-kp1 = 100; kv1=80; kp2=.1; kv2=.1;
+kp1 = 100; kv1=80; kp2=100; kv2=100;
 K = [Kp*beta.' Kd*beta.' 0 0;...
     -kp1*CL -kv1*CL kp2 kv2];
 % feedback PD system
 q0 = zeros(2*qD+2,1);
 q0(1) = -q_des;
-[ts,qout] = ode45(@(ts,q) odefun(ts,q,A,B,K), 0:0.02:10, q0);
+[ts,qout] = ode45(@(ts,q) odefun(ts,q,A,B,K), 0:0.02:20, q0);
 
 u = K*qout';
 qout(:,1) = qout(:,1)+q_des;
@@ -152,7 +90,7 @@ xlabel('time t');
 ylabel('Distance')
 title('Distance of Tip to Target');
 
-skip=1;
+skip=2;
 ts_sample = ts(1:skip:end);
 x_beam = x_beam(1:skip:end,:); y_beam = y_beam(1:skip:end,:);
 x_nominal = x_nominal(1:skip:end,:); y_nominal = y_nominal(1:skip:end,:);
