@@ -81,6 +81,7 @@ sc_x = sci_p_fcn(Ann,Bnn,Cnn,Dnn,ks,x)';
 scpxi_m_scp0_outer = (scp_xi-scp_0)*(scp_xi-scp_0)';
 scxi_m_xiscp0_outer = (sc_xi-xi*scp_0)*(sc_xi-xi*scp_0)';
 Ax = vpaintegral(scpxi_m_scp0_outer,0,x); disp('Ax');
+F0 = vpaintegral((sc_x-x*scp_0)*Ax,0,L);
 A1 = vpaintegral(scxi_m_xiscp0_outer,0,L); disp('A1');
 B1 = vpaintegral((L^2/2-xi^2/2)*scpxi_m_scp0_outer,0,L); disp('B1');
 C0 = vpaintegral(sc_xi,x,L); disp('C0');
@@ -89,7 +90,6 @@ C2 = vpaintegral(kron((scp_x-scp_0),C0)*(scp_x-scp_0)',0,L); disp('C2');
 L1 = vpaintegral(Ax+scp_0*(sc_x'-x*scp_0'),0,L); disp('L1');
 D2 = vpaintegral(sc_x,0,L); D3 = vpaintegral(Ax,0,L); disp('D2 D3');
 E0 = vpaintegral(sc_x-x*scp_0,0,L); disp('E0');
-P = vpaintegral(scpxi_m_scp0_outer*(L-xi),0,L); disp('P');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 save("flexible_beam_system.mat");
